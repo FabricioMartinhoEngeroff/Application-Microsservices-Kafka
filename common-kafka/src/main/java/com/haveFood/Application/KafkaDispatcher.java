@@ -1,32 +1,38 @@
 package com.haveFood.Application;
 
-import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.io.Closeable;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-class KafkaDispatcher<T> implements Closeable {
+public class KafkaDispatcher<T> implements Closeable {
 
-    private final KafkaProducer<String, T> producer;
+    private final KafkaProducer<String, Message<T>> producer;
 
-    KafkaDispatcher() {
+    public KafkaDispatcher() {
         this.producer = new KafkaProducer<>(properties());
     }
+
 
     private static Properties properties() {
         var properties = new Properties();
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GsonSerializer.class.getName());
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
         return properties;
     }
 
-    void send(String topic, String key, T value) throws ExecutionException, InterruptedException {
+    public void send(String topic, String key, CorrelationID id, T payload) throws ExecutionException, InterruptedException {
+        var future = sendAsync(topic, key, id, payload);
+        future.get();
+    }
+
+    Future<RecordMetadata> sendAsync(String topic, String key, CorrelationID id, T payload) {
+        var value = new Message<T>(id, payload);
         var record = new ProducerRecord<>(topic, key, value);
         Callback callback = (data, ex) -> {
             if (ex != null) {
@@ -35,7 +41,8 @@ class KafkaDispatcher<T> implements Closeable {
             }
             System.out.println("sucesso enviando " + data.topic() + ":::partition " + data.partition() + "/ offset " + data.offset() + "/ timestamp " + data.timestamp());
         };
-        producer.send(record, callback).get();
+        return producer.send(record, callback);
+
     }
 
     @Override
@@ -43,3 +50,4 @@ class KafkaDispatcher<T> implements Closeable {
         producer.close();
     }
 }
+

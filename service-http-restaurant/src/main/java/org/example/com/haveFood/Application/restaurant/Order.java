@@ -1,4 +1,4 @@
-package com.haveFood.Application;
+package org.example.com.haveFood.Application.restaurant;
 import java.math.BigDecimal;
 
 public class Order {

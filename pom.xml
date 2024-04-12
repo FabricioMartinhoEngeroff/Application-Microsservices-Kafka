@@ -21,6 +21,8 @@
 		<module>service-new-order</module>
 		<module>common-kafka</module>
         <module>services-users</module>
+        <module>service-http-restaurant</module>
+        <module>service-readin-report</module>
     </modules>
 	<properties>
 		<java.version>17</java.version>
