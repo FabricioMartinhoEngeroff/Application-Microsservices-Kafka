@@ -1,5 +1,4 @@
 package com.haveFood.Application;
-
 import java.math.BigDecimal;
 
 public class Order {
@@ -15,8 +14,8 @@ public class Order {
         this.email = email;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public  BigDecimal getAmount(){
+        return  amount;
     }
 
     public String getEmail() {
@@ -35,7 +34,5 @@ public class Order {
                 ", email='" + email + '\'' +
                 '}';
     }
-
-
 }
 

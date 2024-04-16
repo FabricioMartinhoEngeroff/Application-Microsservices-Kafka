@@ -10,32 +10,20 @@
     </parent>
 
     <groupId>org.example</groupId>
-    <artifactId>service-http-restaurant</artifactId>
+    <artifactId>common-database</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.45.1.0</version>
+        </dependency>
+    </dependencies>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>11.0.20</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.example</groupId>
-            <artifactId>common-kafka</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.example</groupId>
-            <artifactId>common-database</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
 
 </project>

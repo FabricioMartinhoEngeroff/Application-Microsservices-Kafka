@@ -1,5 +1,8 @@
-package com.haveFood.Application;
+package com.haveFood.Application.consumer;
 
+import com.haveFood.Application.Message;
+import com.haveFood.Application.dispatcher.GsonSerializer;
+import com.haveFood.Application.dispatcher.KafkaDispatcher;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -23,7 +26,7 @@ public class KafkaService<T> implements Closeable {
         consumer.subscribe(Collections.singletonList(topic));
     }
 
-    KafkaService(String groupId, Pattern topic, ConsumerFunction<T> parse, Map<String, String> properties) {
+    public KafkaService(String groupId, Pattern topic, ConsumerFunction<T> parse, Map<String, String> properties) {
         this(parse, groupId, properties);
         consumer.subscribe(topic);
     }
@@ -63,6 +66,7 @@ public class KafkaService<T> implements Closeable {
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
         properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
+        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         properties.putAll(overrideProperties);
         return properties;
     }

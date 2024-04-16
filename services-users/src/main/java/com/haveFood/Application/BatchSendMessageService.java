@@ -1,5 +1,7 @@
 package com.haveFood.Application;
 
+import com.haveFood.Application.consumer.KafkaService;
+import com.haveFood.Application.dispatcher.KafkaDispatcher;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.sql.Connection;

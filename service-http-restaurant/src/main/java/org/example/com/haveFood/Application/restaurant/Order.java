@@ -18,5 +18,7 @@ public class Order {
         return email;
     }
 
-
+    public String getOrderId() {
+        return orderId;
+    }
 }

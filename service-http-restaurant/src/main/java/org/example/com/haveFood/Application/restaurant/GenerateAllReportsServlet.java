@@ -2,7 +2,7 @@ package org.example.com.haveFood.Application.restaurant;
 
 
 import com.haveFood.Application.CorrelationID;
-import com.haveFood.Application.KafkaDispatcher;
+import com.haveFood.Application.dispatcher.KafkaDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;

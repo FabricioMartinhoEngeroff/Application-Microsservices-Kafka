@@ -2,7 +2,7 @@ package org.example.com.haveFood.Application.restaurant;
 
 
 import com.haveFood.Application.CorrelationID;
-import com.haveFood.Application.KafkaDispatcher;
+import com.haveFood.Application.dispatcher.KafkaDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,20 +10,18 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.UUID;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 
 public class NewOrderServlet extends HttpServlet {
 
 
     private final KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
-    private final KafkaDispatcher<String> emailDispatcher = new KafkaDispatcher<>();
 
     @Override
     public void destroy() {
         super.destroy();
         orderDispatcher.close();
-        emailDispatcher.close();
     }
 
     @Override
@@ -34,26 +32,26 @@ public class NewOrderServlet extends HttpServlet {
             // showing how to use http as a starting point
             var email = req.getParameter("email");
             var amount = new BigDecimal(req.getParameter("amount"));
-
-            var orderId = UUID.randomUUID().toString();
-
+            var orderId = req.getParameter("uuid");
             var order = new Order(orderId, amount, email);
-            orderDispatcher.send("ECOMMERCE_NEW_ORDER", email,
-                    new CorrelationID(NewOrderServlet.class.getSimpleName()),
-                    order);
 
-            var emailCode = "Thank you for your order! We are processing your order!";
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email,
-                    new CorrelationID(NewOrderServlet.class.getSimpleName()),
-                    emailCode);
+            try (var database = new OrdersDatabase()) {
+                if (database.saveNew(order)) {
+                    orderDispatcher.send("ECOMMERCE_NEW_ORDER", email,
+                            new CorrelationID(NewOrderServlet.class.getSimpleName()),
+                            order);
 
-            System.out.println("New order sent successfully.");
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.getWriter().println("New order sent");
+                    System.out.println("New order sent successfully.");
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.getWriter().println("New order sent");
+                } else {
+                    System.out.println("Old order received.");
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    resp.getWriter().println("Old order received");
+                }
+            }
 
-        } catch (ExecutionException e) {
-            throw new ServletException(e);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | SQLException | ExecutionException e) {
             throw new ServletException(e);
         }
 

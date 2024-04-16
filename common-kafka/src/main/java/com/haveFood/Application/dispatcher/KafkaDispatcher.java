@@ -1,5 +1,7 @@
-package com.haveFood.Application;
+package com.haveFood.Application.dispatcher;
 
+import com.haveFood.Application.CorrelationID;
+import com.haveFood.Application.Message;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -31,8 +33,8 @@ public class KafkaDispatcher<T> implements Closeable {
         future.get();
     }
 
-    Future<RecordMetadata> sendAsync(String topic, String key, CorrelationID id, T payload) {
-        var value = new Message<T>(id, payload);
+    public Future<RecordMetadata> sendAsync(String topic, String key, CorrelationID id, T payload) {
+        var value = new Message<>(id.continueWith("_" + topic), payload);
         var record = new ProducerRecord<>(topic, key, value);
         Callback callback = (data, ex) -> {
             if (ex != null) {

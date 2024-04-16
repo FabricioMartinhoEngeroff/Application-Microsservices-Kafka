@@ -1,5 +1,8 @@
 package com.haveFood.Application;
 
+import com.haveFood.Application.consumer.ConsumerService;
+import com.haveFood.Application.consumer.KafkaService;
+import com.haveFood.Application.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.io.File;
@@ -8,21 +11,15 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
-public class ReadinReportService {
+public class ReadinReportService implements ConsumerService<User> {
 
     private static final Path SOURCE = new File("src/main/resources/report.txt").toPath();
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        var readinReportService = new ReadinReportService();
-        try (var service = new KafkaService<>(ReadinReportService.class.getSimpleName(),
-                "RESTAURANT_USER_GENERATE_READING_REPORT",
-                readinReportService::parse,
-                new HashMap<>())) {
-            service.run();
-        }
+    public static void main(String[] args)  {
+        new ServiceRunner(ReadinReportService::new).start(5);
     }
 
-    private void parse(ConsumerRecord<String,Message<User>> record) throws IOException {
+    public void parse(ConsumerRecord<String, Message<User>> record) throws IOException {
         System.out.println("------------------------------------------");
         System.out.println("Processing report for" + record.value());
 
@@ -34,5 +31,16 @@ public class ReadinReportService {
 
         System.out.println("File created: " + target.getAbsolutePath());
 
+    }
+
+
+    @Override
+    public String getTopic() {
+        return "RESTAURANT_USER_GENERATE_READING_REPORT";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return ReadinReportService.class.getSimpleName();
     }
 }
